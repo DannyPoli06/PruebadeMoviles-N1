@@ -1,0 +1,120 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>UrbanInspect · Quito</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarDatos()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Banner de Bienvenida -->
+  <div class="welcome-card">
+    <div class="welcome-text">
+      <h2>Panel del Inspector</h2>
+      <p>Monitoreo y gestión de infraestructura urbana del Distrito Metropolitano de Quito.</p>
+    </div>
+    <ion-button expand="block" color="secondary" routerLink="/tabs/nueva" class="ion-margin-top">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      Nueva Incidencia
+    </ion-button>
+  </div>
+
+  <!-- Indicadores de Gestión (R10) -->
+  <h3 class="section-title">Resumen de Incidencias</h3>
+  
+  <ion-grid class="stats-grid">
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="stat-card stat-total">
+          <ion-card-content>
+            <div class="stat-number">{{ total() }}</div>
+            <div class="stat-label">Total Registros</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="6">
+        <ion-card class="stat-card stat-alta">
+          <ion-card-content>
+            <div class="stat-number">{{ totalAlta() }}</div>
+            <div class="stat-label">Prioridad Alta</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col size="4">
+        <ion-card class="stat-card stat-pendiente">
+          <ion-card-content>
+            <div class="stat-number">{{ totalPendientes() }}</div>
+            <div class="stat-label">Pendientes</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="4">
+        <ion-card class="stat-card stat-proceso">
+          <ion-card-content>
+            <div class="stat-number">{{ totalEnProceso() }}</div>
+            <div class="stat-label">En Proceso</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="4">
+        <ion-card class="stat-card stat-resuelta">
+          <ion-card-content>
+            <div class="stat-number">{{ totalResueltas() }}</div>
+            <div class="stat-label">Resueltas</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Incidencias Recientes -->
+  <div class="recientes-header">
+    <h3 class="section-title">Casos Recientes</h3>
+    <ion-button fill="clear" size="small" routerLink="/tabs/incidencias">Ver todas</ion-button>
+  </div>
+
+  @if (cargando()) {
+    <ion-list>
+      <ion-item>
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 60px;"></ion-skeleton-text>
+      </ion-item>
+      <ion-item>
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 60px;"></ion-skeleton-text>
+      </ion-item>
+    </ion-list>
+  } @else {
+    <ion-list lines="inset">
+      @for (item of recientes(); track item.codigo) {
+        <ion-item button (click)="irADetalle(item.codigo)" detail="true">
+          <ion-thumbnail slot="start" class="item-thumb">
+            @if (item.fotografia) {
+              <img [src]="item.fotografia" alt="Foto incidencia" />
+            } @else {
+              <div class="no-img-thumb">
+                <ion-icon name="camera-outline"></ion-icon>
+              </div>
+            }
+          </ion-thumbnail>
+          
+          <ion-label>
+            <div class="item-header">
+              <span class="item-codigo">{{ item.codigo }}</span>
+              <ion-badge [color]="getColorEstado(item.estado)">{{ item.estado }}</ion-badge>
+            </div>
+            <h2>{{ item.tipo | titlecase }}</h2>
+            <p>{{ item.direccion }} · {{ item.sector }}</p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

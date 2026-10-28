@@ -1,0 +1,167 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Incidencias Urbanas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="reiniciarLista()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Barra de Búsqueda -->
+  <ion-toolbar color="primary">
+    <ion-searchbar
+      [(ngModel)]="terminoBusqueda"
+      (ionInput)="filtrar()"
+      placeholder="Buscar por código, dirección o sector..."
+      debounce="300"
+      show-clear-button="focus">
+    </ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Filtro por Estado -->
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="filtroEstado" (ionChange)="filtrar()" scrollable="true">
+      <ion-segment-button value="todos">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pendiente">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="en proceso">
+        <ion-label>En Proceso</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="resuelta">
+        <ion-label>Resueltas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Refrescar arrastrando hacia abajo -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar..." refreshingSpinner="circles">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Estado de Carga Inicial -->
+  @if (cargandoInicial()) {
+    <div class="ion-padding">
+      <ion-card>
+        <ion-skeleton-text [animated]="true" style="height: 150px;"></ion-skeleton-text>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 60%;"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 90%;"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+      <ion-card>
+        <ion-skeleton-text [animated]="true" style="height: 150px;"></ion-skeleton-text>
+        <ion-card-content>
+          <ion-skeleton-text [animated]="true" style="width: 60%;"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 90%;"></ion-skeleton-text>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+
+  <!-- Error al Consultar (R2) -->
+  @if (errorConsulta()) {
+    <div class="empty-state">
+      <ion-icon name="alert-circle" color="danger"></ion-icon>
+      <h3>Fallo en la consulta</h3>
+      <p>{{ errorConsulta() }}</p>
+      <ion-button (click)="reiniciarLista()" fill="outline" color="primary">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Reintentar Consulta
+      </ion-button>
+    </div>
+  }
+
+  <!-- Lista Vacía (R2) -->
+  @if (!cargandoInicial() && !errorConsulta() && incidenciasFiltradas().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="list-outline" color="medium"></ion-icon>
+      <h3>No existen registros</h3>
+      <p>No se encontraron incidencias que coincidan con los filtros aplicados.</p>
+    </div>
+  }
+
+  <!-- Listado de Tarjetas de Incidencias (R2) -->
+  <ion-list class="incidencias-list">
+    @for (item of incidenciasFiltradas(); track item.codigo) {
+      <ion-card class="incidencia-card">
+        <!-- Imagen de Cabecera si existe -->
+        @if (item.fotografia) {
+          <div class="card-img-container" (click)="irADetalle(item.codigo)">
+            <img [src]="item.fotografia" alt="Foto de incidencia" />
+            <div class="img-badge-overlay">
+              <ion-badge [color]="getColorPrioridad(item.prioridad)">
+                Prioridad {{ item.prioridad | uppercase }}
+              </ion-badge>
+            </div>
+          </div>
+        }
+
+        <ion-card-header>
+          <div class="card-meta">
+            <span class="codigo-chip">{{ item.codigo }}</span>
+            <div class="meta-right">
+              <ion-badge [color]="getColorEstado(item.estado)">{{ item.estado }}</ion-badge>
+              <!-- Botón de Seguimiento Local (R1) -->
+              <ion-button
+                fill="clear"
+                size="small"
+                class="btn-seguimiento"
+                (click)="toggleSeguimiento(item.codigo, $event)"
+                [color]="esSeguimiento(item.codigo) ? 'warning' : 'medium'">
+                <ion-icon
+                  slot="icon-only"
+                  [name]="esSeguimiento(item.codigo) ? 'bookmark' : 'bookmark-outline'">
+                </ion-icon>
+              </ion-button>
+            </div>
+          </div>
+          
+          <ion-card-title (click)="irADetalle(item.codigo)">
+            {{ item.tipo | titlecase }}
+          </ion-card-title>
+          <ion-card-subtitle>{{ item.direccion }} · Sector {{ item.sector }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content (click)="irADetalle(item.codigo)">
+          <p class="desc-text">{{ item.descripcion }}</p>
+
+          <div class="info-row">
+            <span class="fecha-text">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ item.fecha | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+
+            @if (item.temperatura !== undefined) {
+              <span class="clima-text">
+                <ion-icon name="cloudy-outline"></ion-icon>
+                {{ item.temperatura }}°C ({{ item.precipitacion || 0 }} mm)
+              </span>
+            }
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  </ion-list>
+
+  <!-- Paginación Remota Incremental (R3) -->
+  <ion-infinite-scroll [disabled]="finDeRegistros()" (ionInfinite)="cargarMas($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Cargando más incidencias desde la oficina...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  @if (finDeRegistros() && incidenciasFiltradas().length > 0) {
+    <div class="fin-registros-msg">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <span>Todos los registros remotos han sido cargados</span>
+    </div>
+  }
+</ion-content>

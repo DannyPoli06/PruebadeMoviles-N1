@@ -1,0 +1,131 @@
+.incidencias-list {
+  background: transparent;
+  padding: 8px 0;
+}
+
+.incidencia-card {
+  margin: 12px 16px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.15s ease-in-out;
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  ion-card-header {
+    padding-bottom: 6px;
+  }
+
+  ion-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.card-img-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background-color: var(--ion-color-light-shade);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .img-badge-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+
+  .codigo-chip {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--ion-color-primary);
+    background: var(--ion-color-primary-tint);
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .meta-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .btn-seguimiento {
+    --padding-start: 4px;
+    --padding-end: 4px;
+    font-size: 1.25rem;
+  }
+}
+
+.desc-text {
+  font-size: 0.92rem;
+  color: var(--ion-color-dark);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--ion-color-medium);
+  border-top: 1px dashed var(--ion-color-light-shade);
+  padding-top: 8px;
+  margin-top: 8px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 4rem;
+    margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+    margin: 0 0 6px 0;
+  }
+
+  p {
+    margin: 0 0 16px 0;
+    font-size: 0.9rem;
+  }
+}
+
+.fin-registros-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}

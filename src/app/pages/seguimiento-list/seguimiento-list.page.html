@@ -1,0 +1,78 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Mis Seguimientos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarSeguimientos()">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Banner Informativo R1 -->
+  <div class="local-banner">
+    <ion-icon name="shield-checkmark-outline"></ion-icon>
+    <div class="banner-text">
+      <strong>Seguimiento Personal del Dispositivo</strong>
+      <p>Estos casos se guardan exclusivamente en tu teléfono. No se sincronizan con la oficina.</p>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="ion-padding">
+      <ion-card>
+        <ion-skeleton-text [animated]="true" style="height: 120px;"></ion-skeleton-text>
+      </ion-card>
+    </div>
+  }
+
+  <!-- Estado Vacío -->
+  @if (!cargando() && incidenciasSeguidas().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="bookmark-outline" color="medium"></ion-icon>
+      <h3>Sin incidencias en seguimiento</h3>
+      <p>Marca casos en el listado de incidencias presionando el icono de marcador para hacerles seguimiento prioritario.</p>
+      <ion-button routerLink="/tabs/incidencias" fill="outline" color="primary">
+        Ir a Incidencias
+      </ion-button>
+    </div>
+  }
+
+  <!-- Lista de Incidencias en Seguimiento -->
+  <ion-list class="incidencias-list">
+    @for (item of incidenciasSeguidas(); track item.codigo) {
+      <ion-card class="incidencia-card">
+        <ion-card-header>
+          <div class="card-meta">
+            <span class="codigo-chip">{{ item.codigo }}</span>
+            <div class="meta-right">
+              <ion-badge [color]="getColorEstado(item.estado)">{{ item.estado }}</ion-badge>
+              <!-- Botón Desmarcar -->
+              <ion-button
+                fill="clear"
+                size="small"
+                color="danger"
+                (click)="desmarcar(item.codigo)">
+                <ion-icon slot="start" name="trash-outline"></ion-icon>
+                Quitar
+              </ion-button>
+            </div>
+          </div>
+          <ion-card-title (click)="irADetalle(item.codigo)">
+            {{ item.tipo | titlecase }}
+          </ion-card-title>
+          <ion-card-subtitle>{{ item.direccion }} · {{ item.sector }}</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content (click)="irADetalle(item.codigo)">
+          <p class="desc-text">{{ item.descripcion }}</p>
+          <div class="fecha-row">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ item.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  </ion-list>
+</ion-content>

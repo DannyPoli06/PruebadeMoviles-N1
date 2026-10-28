@@ -1,0 +1,129 @@
+.welcome-card {
+  background: linear-gradient(135deg, #1b3554, #2c5382);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+
+  h2 {
+    margin: 0 0 6px 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    line-height: 1.3;
+  }
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ion-color-dark);
+  margin: 16px 4px 8px 4px;
+}
+
+.stats-grid {
+  padding: 0;
+  margin-bottom: 12px;
+
+  ion-col {
+    padding: 4px;
+  }
+}
+
+.stat-card {
+  margin: 0;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  ion-card-content {
+    padding: 12px 6px;
+  }
+
+  .stat-number {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  &.stat-total {
+    border-top: 4px solid #3880ff;
+    .stat-number { color: #3880ff; }
+  }
+
+  &.stat-alta {
+    border-top: 4px solid #eb445a;
+    .stat-number { color: #eb445a; }
+  }
+
+  &.stat-pendiente {
+    border-top: 4px solid #ffc409;
+    .stat-number { color: #b8860b; }
+  }
+
+  &.stat-proceso {
+    border-top: 4px solid #3dc2ff;
+    .stat-number { color: #0288d1; }
+  }
+
+  &.stat-resuelta {
+    border-top: 4px solid #2dd36f;
+    .stat-number { color: #2e7d32; }
+  }
+}
+
+.recientes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.item-thumb {
+  --size: 54px;
+  border-radius: 8px;
+  overflow: hidden;
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  .no-img-thumb {
+    width: 100%;
+    height: 100%;
+    background-color: var(--ion-color-light-shade);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+
+  .item-codigo {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--ion-color-medium-tint);
+  }
+}

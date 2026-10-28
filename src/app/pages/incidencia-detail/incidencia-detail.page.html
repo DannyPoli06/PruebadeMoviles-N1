@@ -1,0 +1,195 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/incidencias" text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle de Incidencia</ion-title>
+    <ion-buttons slot="end">
+      @if (incidencia()) {
+        <!-- Botón de Seguimiento Local (R1) -->
+        <ion-button (click)="toggleSeguimiento()">
+          <ion-icon
+            slot="icon-only"
+            [name]="esSeguimiento() ? 'bookmark' : 'bookmark-outline'"
+            [color]="esSeguimiento() ? 'warning' : 'light'">
+          </ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (cargando()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando información del caso...</p>
+    </div>
+  } @else if (incidencia()) {
+    
+    <!-- Imagen de la Incidencia (R2 y R6) -->
+    <div class="foto-detail-container">
+      @if (incidencia()!.fotografia) {
+        <img [src]="incidencia()!.fotografia" alt="Foto evidencia" />
+      } @else {
+        <div class="no-photo-box">
+          <ion-icon name="camera-outline"></ion-icon>
+          <span>Sin fotografía registrada</span>
+        </div>
+      }
+      <div class="status-overlay">
+        <ion-badge [color]="getColorEstado(incidencia()!.estado)" class="badge-lg">
+          {{ incidencia()!.estado | uppercase }}
+        </ion-badge>
+      </div>
+    </div>
+
+    <!-- TARJETA CON LOS 8 CAMPOS OBLIGATORIOS (R2) -->
+    <ion-card class="detail-card">
+      <ion-card-header>
+        <div class="codigo-row">
+          <span class="codigo-label">CÓDIGO DE CASO</span>
+          <span class="codigo-valor">{{ incidencia()!.codigo }}</span>
+        </div>
+        <ion-card-title>{{ incidencia()!.tipo | titlecase }}</ion-card-title>
+        <ion-card-subtitle>
+          Prioridad: 
+          <ion-badge [color]="getColorPrioridad(incidencia()!.prioridad)">
+            {{ incidencia()!.prioridad | uppercase }}
+          </ion-badge>
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <!-- Campo: Descripción -->
+        <div class="field-section">
+          <span class="field-title">Descripción</span>
+          <p class="field-content">{{ incidencia()!.descripcion }}</p>
+        </div>
+
+        <ion-list lines="full" class="fields-list">
+          <!-- Campo: Dirección -->
+          <ion-item>
+            <ion-icon slot="start" name="location-outline" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Dirección</h3>
+              <p>{{ incidencia()!.direccion }}</p>
+            </ion-label>
+          </ion-item>
+
+          <!-- Campo: Sector -->
+          <ion-item>
+            <ion-icon slot="start" name="navigate-outline" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Sector del DMQ</h3>
+              <p>{{ incidencia()!.sector }}</p>
+            </ion-label>
+          </ion-item>
+
+          <!-- Campo: Fecha -->
+          <ion-item>
+            <ion-icon slot="start" name="time-outline" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Fecha de Registro</h3>
+              <p>{{ incidencia()!.fecha | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+            </ion-label>
+          </ion-item>
+
+          <!-- Coordenadas GPS (si existen) -->
+          @if (incidencia()!.latitud && incidencia()!.longitud) {
+            <ion-item>
+              <ion-icon slot="start" name="location" color="danger"></ion-icon>
+              <ion-label>
+                <h3>Coordenadas GPS</h3>
+                <p>{{ incidencia()!.latitud }}, {{ incidencia()!.longitud }}</p>
+              </ion-label>
+              <ion-button slot="end" fill="clear" (click)="abrirMapa()">
+                <ion-icon slot="icon-only" name="navigate-outline"></ion-icon>
+              </ion-button>
+            </ion-item>
+          }
+
+          <!-- Condiciones Meteorológicas registradas (R4) -->
+          @if (incidencia()!.temperatura !== undefined) {
+            <ion-item>
+              <ion-icon slot="start" name="cloudy-outline" color="secondary"></ion-icon>
+              <ion-label>
+                <h3>Condiciones Meteorológicas</h3>
+                <p>
+                  {{ incidencia()!.temperatura }} °C · Lluvia: {{ incidencia()!.precipitacion || 0 }} mm
+                  ({{ incidencia()!.condicionClima || 'Registrado' }})
+                </p>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+
+        <!-- Observación de Resolución (R9) -->
+        @if (incidencia()!.observacion) {
+          <div class="resolucion-box">
+            <div class="res-header">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <strong>Observación de Resolución (R9):</strong>
+            </div>
+            <p>{{ incidencia()!.observacion }}</p>
+          </div>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    <!-- GESTIÓN DE TRANSICIÓN DE ESTADOS (R9) -->
+    <ion-card class="actions-card">
+      <ion-card-header>
+        <ion-card-title>Gestión de Estado (R9)</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+
+        <!-- Estado actual: Pendiente -->
+        @if (incidencia()!.estado === 'pendiente') {
+          <p class="rule-hint">Desde <em>Pendiente</em> puedes pasar a <em>En Proceso</em> o <em>Resuelta</em>.</p>
+          <div class="actions-grid">
+            <ion-button expand="block" color="primary" (click)="cambiarAEnProceso()">
+              <ion-icon slot="start" name="time-outline"></ion-icon>
+              Iniciar Proceso
+            </ion-button>
+            <ion-button expand="block" color="success" (click)="abrirDialogoResolver()">
+              <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+              Marcar como Resuelta
+            </ion-button>
+          </div>
+        }
+
+        <!-- Estado actual: En Proceso -->
+        @if (incidencia()!.estado === 'en proceso') {
+          <p class="rule-hint">Desde <em>En Proceso</em> puedes marcar la incidencia como <em>Resuelta</em>.</p>
+          <ion-button expand="block" color="success" (click)="abrirDialogoResolver()">
+            <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+            Marcar como Resuelta
+          </ion-button>
+        }
+
+        <!-- Estado actual: Resuelta -->
+        @if (incidencia()!.estado === 'resuelta') {
+          <div class="locked-state">
+            <ion-icon name="checkmark-circle" color="success"></ion-icon>
+            <div>
+              <strong>Incidencia Resuelta y Cerrada</strong>
+              <p>Conforme a la regla R9, una incidencia resuelta es definitiva y no puede regresar a estado pendiente ni en proceso.</p>
+            </div>
+          </div>
+        }
+
+      </ion-card-content>
+    </ion-card>
+
+  } @else {
+    <div class="not-found-state">
+      <ion-icon name="alert-circle" color="danger"></ion-icon>
+      <h3>Incidencia no encontrada</h3>
+      <p>No se encontró ningún registro para el código especificado.</p>
+      <ion-button routerLink="/tabs/incidencias" fill="outline">
+        Volver al Listado
+      </ion-button>
+    </div>
+  }
+</ion-content>
